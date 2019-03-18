@@ -82,7 +82,7 @@ const randomString = (length = randomNumber(0, 32)) =>
 
 const generateRandomString = Gen(randomString);
 
-const nils = () => randomArg(void 0, null);
+const nils = () => randomArg(void 0, null, NaN);
 
 const primitives = [
     () => randomString(),
