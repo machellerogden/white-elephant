@@ -334,7 +334,7 @@ randomFnCall(() => randomString(3), () => randomNumber(1, 10));
 
 # Generators
 
-With there random data generators in hand, you are unstoppable.
+With these random data generators in hand, you are unstoppable.
 
 Unfamiliar with generators? [RTFM here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators).
 
