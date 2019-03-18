@@ -4,7 +4,7 @@
 
 ## Synopsis
 
-White Elephant is your friend random data provider. It exports both functions and generators which allow you to easily curate whatever the random data suits your needs.
+White Elephant is your friendly random data provider. It exports both functions and generators, allowing you to easily curate whatever random data suits your needs.
 
 ## Why?
 
