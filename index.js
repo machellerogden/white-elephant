@@ -1,5 +1,43 @@
 'use strict';
 
+function weigh(x, weight = 1) {
+    if (Array.isArray(x)) return x.map(v => weigh(v)).flat();
+    return (new Array(weight)).fill(x);
+}
+
+const ranges = [
+    [ 0, 10 ],
+    [ 11, 100 ],
+    [ 101, 1000 ],
+    [ 1001, 10000 ],
+    [ 10001, 100000 ],
+    [ 100001, 1000000 ],
+    [ 1000001, 10000000 ],
+    [ 10000001, 100000000 ],
+    [ 100000001, 1000000000 ],
+    [ 1000000001, 10000000000 ],
+    [ 10000000001, 100000000000 ],
+    [ 100000000001, 1000000000000 ],
+    [ 1000000000001, 10000000000000 ],
+    [ 10000000000001, 100000000000000 ],
+    [ 100000000000001, Number.MAX_SAFE_INTEGER ]
+];
+
+const randomArg = (...args) => args[randomNumber(0, args.length - 1)];
+const randomFnCall = (...fns) => randomArg(...fns)();
+
+function randomNumber(...args) {
+    if (args.length === 0) {
+        args = randomArg(...ranges);
+    } else if (args.length === 1) {
+        args[1] = Number.MAX_SAFE_INTEGER;
+    }
+    const [ min, max ] = args;
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+const randomBoolean = () => randomArg(true, false);
+
 const unicodeDigits = [ 49, 57 ];
 const unicodeUpper = [ 65, 90 ];
 const unicodeLower = [ 97, 122 ];
@@ -10,109 +48,90 @@ const unicodeRanges = [
     unicodeLower
 ];
 
-function generatorFromFn(fn) {
+const randomCharacter = () =>
+    String.fromCharCode(randomNumber(...unicodeRanges[randomNumber(0, 2)]));
+
+function Gen(fn) {
     return function* (count = 1, ...args) {
         let i = 0;
         while (i++ < count) yield fn(...args);
     };
 }
 
-function randomNumber (min = 0, max = 100) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
+const generateRandomNumber = Gen(randomNumber);
+const generateRandomBoolean = Gen(randomBoolean);
+const generateRandomCharacter = Gen(randomCharacter);
 
-const generateRandomNumber = generatorFromFn(randomNumber);
+const randomString = (length = randomNumber(0, 32)) =>
+    [ ...generateRandomCharacter(length) ].join('');
 
-function randomArg(...args) {
-    return args[randomNumber(0, args.length - 1)];
-}
+const generateRandomString = Gen(randomString);
 
-function randomCharacter() {
-    return String.fromCharCode(randomNumber(...unicodeRanges[randomNumber(0, 2)]));
-}
+const nils = () => randomArg(void 0, null);
 
-const generateRandomCharacter = generatorFromFn(randomCharacter);
+const primitives = [
+    () => randomString(),
+    () => randomNumber(),
+    () => randomBoolean()
+];
 
-function randomString(length = randomNumber(1, 16)) {
-    return [ ...generateRandomCharacter(length) ].join(''); 
-}
+const objects = (maxDepth, width, consistentDepth, consistentWidth) => [
+    () => randomArray(maxDepth - 1, width != null ? width : randomNumber(0, 16), consistentDepth, consistentWidth),
+    () => randomObject(maxDepth - 1, width != null ? width : randomNumber(0, 16), consistentDepth, consistentWidth)
+];
 
-const generateRandomString = generatorFromFn(randomString);
-
-function randomArrayOfNonArrays(length = randomNumber(1, 16)) {
-    let i = 0;
-    const arr = [];
-    while (i++ < length) {
-        arr.push(randomArg(randomString, randomNumber, randomObjectOfLiterals, () => void 0)());
+function randomArray(maxDepth = 1, baseLength = randomNumber(0, 16), consistentDepth = false, consistentLength = false) {
+    const stub = [ ...(new Array(baseLength)) ];
+    let fns = weigh(primitives, 2);
+    if (maxDepth > 1) {
+        const obs = consistentLength
+            ? objects(maxDepth - 1, baseLength, consistentDepth, consistentLength)
+            : objects(maxDepth - 1, null, consistentDepth, consistentLength);
+        fns = consistentDepth
+            ? obs
+            : [ ...fns, ...weigh(obs, 2), nils ];
     }
-    return arr;
+    return stub.map(() => randomFnCall(...fns));
 }
 
-function randomArray(length = randomNumber(1, 16)) {
+function randomObject(maxDepth = 1, baseWidth = randomNumber(0, 16), consistentDepth = false, consistentWidth = false) {
+    const stub = {};
+    let fns = weigh(primitives, 2);
     let i = 0;
-    const arr = [];
-    while (i++ < length) {
-        arr.push(randomArg(randomString, randomNumber, randomObjectOfLiterals, randomArrayOfNonArrays)());
-    }
-    return arr;
-}
-
-const generateRandomArray = generatorFromFn(randomArray);
-
-function randomLiteral() {
-    return randomArg(randomString, randomNumber, () => void 0)();
-}
-
-const generateRandomLiteral = generatorFromFn(randomLiteral);
-
-function randomObjectOfLiterals(width = randomNumber(1, 20), depth = randomNumber(1, 5)) {
-    const obj = {};
-    let iw = 0;
-    let cursor = obj;
-    while (iw < width) {
-        const key = randomString();
-        let id = 1;
-        if (id < depth) {
-            while (id < depth) {
-                const newObj = {};
-                cursor[key] = newObj;
-                cursor = cursor[key];
-                let iww = 0;
-                while (iww++ < width) {
-                    cursor[randomString()] = randomLiteral();
-                }
-                id++;
-            }
-        } else {
-            cursor[randomString()] = randomLiteral();
+    while (i++ < baseWidth) {
+        let key = randomString(randomNumber(0, 32));
+        if (maxDepth > 1) {
+            const obs = consistentWidth
+                ? objects(maxDepth - 1, baseWidth, consistentDepth, consistentWidth)
+                : objects(maxDepth - 1, randomNumber(0, 16), consistentDepth, consistentWidth);
+            fns = consistentDepth
+                ? obs
+                : [ ...fns, ...weigh(obs, 2), nils ];
         }
-
-        cursor = obj;
-        iw++;
+        const value = randomFnCall(...fns);
+        while (Reflect.has(stub, key)) {
+            key = randomString(randomNumber(0, 32));
+        }
+        stub[key] = value;
     }
-    return obj;
+    return stub;
 }
 
-const generateRandomObjectOfLiterals = generatorFromFn(randomObjectOfLiterals);
+const generateRandomArray = Gen(randomArray);
+const generateRandomObject = Gen(randomObject);
 
-function randomObject(width = randomNumber(1, 20)) {
-    const obj = {};
-    let i = 0;
-    while (i++ < width) {
-        obj[randomString()] = randomArg(randomString, randomNumber, randomArray, randomObjectOfLiterals, () => void 0)();
-    }
-    return obj;
-}
+const randomData = (maxDepth = 1) => randomFnCall(
+    ...primitives,
+    () => randomObject(maxDepth),
+    () => randomArray(maxDepth));
 
-const generateRandomObject = generatorFromFn(randomObject);
-
-const randomData = () => randomArg(randomString, randomNumber, randomArray, randomObject, () => void 0)();
-
-const generateRandomData = generatorFromFn(randomData);
+const generateRandomData = Gen(randomData);
 
 module.exports = {
     randomNumber,
     generateRandomNumber,
+    randomBoolean,
+    generateRandomBoolean,
     randomCharacter,
     generateRandomCharacter,
     randomString,
@@ -122,6 +141,6 @@ module.exports = {
     randomObject,
     generateRandomObject,
     randomData,
-    generateRandomData
+    generateRandomData,
+    randomFnCall
 };
-
