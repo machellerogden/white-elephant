@@ -2,23 +2,23 @@
 
 > Generate random data.
 
-### Synopsis
+## Synopsis
 
 White Elephant is your friend random data provider. It exports both functions and generators which allow you to easily curate whatever the random data suits your needs.
 
-### Why?
+## Why?
 
 Random data is useful for testing. But you already know this or you wouldn't be here.
 
-### Install
+## Install
 
 ```sh
 npm i -D white-elephant
 ```
 
-### Usage
+## Usage
 
-## Functions
+# Functions
 
 Functions for creating different types of random data.
 
@@ -35,7 +35,7 @@ const {
 } = require('white-elephant');
 ```
 
-## `randomNumber([min = 0], [max = Number.MAX_SAFE_INTEGER])`
+### `randomNumber([min = 0], [max = Number.MAX_SAFE_INTEGER])`
 
 _**Note:** Random numbers are generated on a curve in order to ensure you get a good mix of smaller and larger numbers._
 
@@ -65,7 +65,7 @@ randomNumber(10, 50);
 // => 23
 ```
 
-## `randomCharacter()`
+### `randomCharacter()`
 
 ```js
 randomCharacter();
@@ -81,7 +81,7 @@ randomCharacter();
 // => 'q'
 ```
 
-## `randomBoolean()`
+### `randomBoolean()`
 
 ```js
 randomBoolean();
@@ -94,7 +94,7 @@ randomBoolean();
 // => false
 ```
 
-## `randomString([length = randomNumber(0, 32)])`
+### `randomString([length = randomNumber(0, 32)])`
 
 ```js
 randomString();
@@ -113,7 +113,7 @@ randomString(64);
 // => '55ehKHkFKvtrf7f8jnjmuAMeNQqRCG86D826f8JKPb9jaHzwT3qXFtw8efk1FRWJ'
 ```
 
-## `randomArray([maxDepth = 1], [baseLength = randomNumber(0, 16)], [consistentDepth = false], [consistentLength = false])`
+### `randomArray([maxDepth = 1], [baseLength = randomNumber(0, 16)], [consistentDepth = false], [consistentLength = false])`
 
 ```js
 randomArray();
@@ -182,7 +182,7 @@ randomArray(1, 10);
 //      5244060647 ]
 ```
 
-## `randomObject([maxDepth = 1], [baseWidth = randomNumber(0, 16)], [consistentDepth = false], [consistentWidth = false])`
+### `randomObject([maxDepth = 1], [baseWidth = randomNumber(0, 16)], [consistentDepth = false], [consistentWidth = false])`
 
 ```js
 randomObject();
@@ -219,7 +219,7 @@ randomObject(2, 1);
      6895888562 ] }
 ```
 
-## `randomData([maxDepth = 1])`
+### `randomData([maxDepth = 1])`
 
 ```js
 randomData();
@@ -309,7 +309,7 @@ randomData(2);
 //      '4Jh3r2dD4QD6hoI6SnCW43uT8M36ol': [ 915407 ] }
 ```
 
-## `randomFnCall(...fns)`
+### `randomFnCall(...fns)`
 
 Sometimes you want to call a random function...
 
@@ -324,7 +324,7 @@ randomFnCall(() => randomString(3), () => randomNumber(1, 10));
 // => 'bP8'
 ```
 
-## Generators
+# Generators
 
 With there random data generators in hand, you are unstoppable.
 
@@ -342,7 +342,7 @@ const {
 } = require('white-elephant');
 ```
 
-## `generateRandomNumber([count = 1], [min = 0], [max = Number.MAX_SAFE_INTEGER])`
+### `generateRandomNumber([count = 1], [min = 0], [max = Number.MAX_SAFE_INTEGER])`
 
 ```js
 [ ...generateRandomNumber(10) ];
@@ -355,7 +355,7 @@ generateRandomNumber().next().value;
 // => 1058
 ```
 
-## `generateRandomBoolean([count = 1])`
+### `generateRandomBoolean([count = 1])`
 
 ```js
 [ ...generateRandomBoolean(10) ];
@@ -365,7 +365,7 @@ generateRandomBoolean().next().value;
 // => false
 ```
 
-## `generateRandomCharacter([count = 1])`
+### `generateRandomCharacter([count = 1])`
 
 ```js
 [ ...generateRandomCharacter(10) ];
@@ -375,7 +375,7 @@ generateRandomCharacter().next().value;
 // => '6'
 ```
 
-## `generateRandomString([count = 1], [length = randomNumber(0, 32)])`
+### `generateRandomString([count = 1], [length = randomNumber(0, 32)])`
 
 ```js
 [ ...generateRandomString(3) ];
@@ -388,7 +388,7 @@ generateRandomString().next().value;
 // => '1Kq4'
 ```
 
-## `generateRandomArray([count = 1], [maxDepth = 1], [baseLength = randomNumber(0, 16)])`
+### `generateRandomArray([count = 1], [maxDepth = 1], [baseLength = randomNumber(0, 16)])`
 
 ```js
 [ ...generateRandomArray(4, 1, 1) ];
@@ -398,7 +398,7 @@ generateRandomArray().next().value;
 // => [ 'cj2v953528j', 86088975, 'KWxJ49bL', true, false, true, false ]
 ```
 
-## `generateRandomObject([count = 1], [maxDepth = 1], [baseWidth = randomNumber(0, 16)])`
+### `generateRandomObject([count = 1], [maxDepth = 1], [baseWidth = randomNumber(0, 16)])`
 
 ```js
 [ ...generateRandomObject() ];
@@ -441,7 +441,7 @@ generateRandomArray().next().value;
 //           qnLlFthMWIg7m8IeTKz348qua4x3h: 7973 } } ]
 ```
 
-## `generateRandomData([count = 1], [maxDepth = 1])`
+### `generateRandomData([count = 1], [maxDepth = 1])`
 
 By now, you get the idea...
 
