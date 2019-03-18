@@ -15,5 +15,9 @@
     "object"
   ],
   "author": "Mac Heller-Ogden",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/machellerogden/white-elephant.git"
+  },
   "license": "MIT"
 }

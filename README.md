@@ -113,7 +113,7 @@ randomString(64);
 // => '55ehKHkFKvtrf7f8jnjmuAMeNQqRCG86D826f8JKPb9jaHzwT3qXFtw8efk1FRWJ'
 ```
 
-### `randomArray([maxDepth = 1], [baseLength = randomNumber(0, 16)], [consistentDepth = false], [consistentLength = false])`
+### `randomArray([maxDepth = 1], [baseLength = randomNumber(0, 16)], [uniformDepth = false], [uniformLength = false])`
 
 ```js
 randomArray();
@@ -180,9 +180,13 @@ randomArray(1, 10);
 //      '9R',
 //      571,
 //      5244060647 ]
+
+// You can use the `uniformDepth` and `uniformLength` arguments to ensure even depth and even length.
+randomArray(3, 1, true, true);
+// => [ { O29yzg5dik54jIp6V2JN3kG3oSfFD843: [ 'F4t4j58Hw813QST9xGIts37Rl' ] } ]
 ```
 
-### `randomObject([maxDepth = 1], [baseWidth = randomNumber(0, 16)], [consistentDepth = false], [consistentWidth = false])`
+### `randomObject([maxDepth = 1], [baseWidth = randomNumber(0, 16)], [uniformDepth = false], [uniformWidth = false])`
 
 ```js
 randomObject();
@@ -217,6 +221,10 @@ randomObject(2, 1);
      85130175878499,
      759054611,
      6895888562 ] }
+
+// You can use the `uniformDepth` and `uniformWidth` arguments to ensure even depth and even property count.
+randomObject(3, 1, true, true);
+// => { IrA8N6pX1Tugm6o2: { k6Vn61b8W9OZKt3HsJLj78XM: [ 199 ] } }
 ```
 
 ### `randomData([maxDepth = 1])`
@@ -388,7 +396,7 @@ generateRandomString().next().value;
 // => '1Kq4'
 ```
 
-### `generateRandomArray([count = 1], [maxDepth = 1], [baseLength = randomNumber(0, 16)])`
+### `generateRandomArray([count = 1], [maxDepth = 1], [baseLength = randomNumber(0, 16)], [uniformDepth = false], [uniformLength = false])`
 
 ```js
 [ ...generateRandomArray(4, 1, 1) ];
@@ -396,9 +404,12 @@ generateRandomString().next().value;
 
 generateRandomArray().next().value;
 // => [ 'cj2v953528j', 86088975, 'KWxJ49bL', true, false, true, false ]
+
+[ ...generateRandomArray(1, 2, 1, true, true) ];
+// => [ [ [ 'sn1sVY91lF86' ] ] ]
 ```
 
-### `generateRandomObject([count = 1], [maxDepth = 1], [baseWidth = randomNumber(0, 16)])`
+### `generateRandomObject([count = 1], [maxDepth = 1], [baseWidth = randomNumber(0, 16)], [uniformDepth = false], [uniformWidth = false])`
 
 ```js
 [ ...generateRandomObject() ];
@@ -439,6 +450,9 @@ generateRandomArray().next().value;
 //           bLFsYTjOPON3ydH5CTQ5: 0,
 //           jlIWlwVkjIn51NjHs68AZ: false,
 //           qnLlFthMWIg7m8IeTKz348qua4x3h: 7973 } } ]
+
+[ ...generateRandomObject(1, 3, 1, true, true) ]
+// => [ { GylvgG8Ptn75IH: { '5nZb9589VSn5Yr1Mc1D7': { Y5O6LOx: 896 } } } ]
 ```
 
 ### `generateRandomData([count = 1], [maxDepth = 1])`

@@ -75,36 +75,42 @@ const primitives = [
     () => randomBoolean()
 ];
 
-const objects = (maxDepth, width, consistentDepth, consistentWidth) => [
-    () => randomArray(maxDepth - 1, width != null ? width : randomNumber(0, 16), consistentDepth, consistentWidth),
-    () => randomObject(maxDepth - 1, width != null ? width : randomNumber(0, 16), consistentDepth, consistentWidth)
+const objects = (maxDepth, width, uniformDepth, uniformWidth) => [
+    () => randomArray(maxDepth, width != null ? width : randomNumber(0, 16), uniformDepth, uniformWidth),
+    () => randomObject(maxDepth, width != null ? width : randomNumber(0, 16), uniformDepth, uniformWidth)
 ];
 
-function randomArray(maxDepth = 1, baseLength = randomNumber(0, 16), consistentDepth = false, consistentLength = false) {
-    const stub = [ ...(new Array(baseLength)) ];
+function randomArray(maxDepth = 1, baseLength = randomNumber(0, 16), uniformDepth = false, uniformLength = false) {
+    const stub = [];
     let fns = weigh(primitives, 2);
-    if (maxDepth > 1) {
-        const obs = consistentLength
-            ? objects(maxDepth - 1, baseLength, consistentDepth, consistentLength)
-            : objects(maxDepth - 1, null, consistentDepth, consistentLength);
-        fns = consistentDepth
-            ? obs
-            : [ ...fns, ...weigh(obs, 2), nils ];
+    let i = 0;
+    while (i < baseLength) {
+        if (maxDepth > 1) {
+            const obs = uniformLength
+                ? objects(maxDepth - 1, baseLength, uniformDepth, uniformLength)
+                : objects(maxDepth - 1, null, uniformDepth, uniformLength);
+            fns = uniformDepth
+                ? obs
+                : [ ...fns, ...weigh(obs, 2), nils ];
+        }
+        const value = randomFnCall(...fns);
+        stub[i] = value;
+        i++;
     }
-    return stub.map(() => randomFnCall(...fns));
+    return stub;
 }
 
-function randomObject(maxDepth = 1, baseWidth = randomNumber(0, 16), consistentDepth = false, consistentWidth = false) {
+function randomObject(maxDepth = 1, baseWidth = randomNumber(0, 16), uniformDepth = false, uniformWidth = false) {
     const stub = {};
     let fns = weigh(primitives, 2);
     let i = 0;
-    while (i++ < baseWidth) {
+    while (i < baseWidth) {
         let key = randomString(randomNumber(0, 32));
         if (maxDepth > 1) {
-            const obs = consistentWidth
-                ? objects(maxDepth - 1, baseWidth, consistentDepth, consistentWidth)
-                : objects(maxDepth - 1, randomNumber(0, 16), consistentDepth, consistentWidth);
-            fns = consistentDepth
+            const obs = uniformWidth
+                ? objects(maxDepth - 1, baseWidth, uniformDepth, uniformWidth)
+                : objects(maxDepth - 1, randomNumber(0, 16), uniformDepth, uniformWidth);
+            fns = uniformDepth
                 ? obs
                 : [ ...fns, ...weigh(obs, 2), nils ];
         }
@@ -113,6 +119,7 @@ function randomObject(maxDepth = 1, baseWidth = randomNumber(0, 16), consistentD
             key = randomString(randomNumber(0, 32));
         }
         stub[key] = value;
+        i++;
     }
     return stub;
 }
