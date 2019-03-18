@@ -56,12 +56,25 @@ const randomBoolean = () => randomArg(true, false);
 const unicodeDigits = [ 49, 57 ];
 const unicodeUpper = [ 65, 90 ];
 const unicodeLower = [ 97, 122 ];
+const unicodeAlpha = [ unicodeUpper, unicodeLower ];
 
 const unicodeRanges = [
     unicodeDigits,
     unicodeUpper,
     unicodeLower
 ];
+
+const randomNumeric = () =>
+    String.fromCharCode(randomNumber(...unicodeDigits));
+
+const randomUpper = () =>
+    String.fromCharCode(randomNumber(...unicodeUpper));
+
+const randomLower = () =>
+    String.fromCharCode(randomNumber(...unicodeLower));
+
+const randomAlpha = () =>
+    String.fromCharCode(randomNumber(...unicodeAlpha[randomNumber(0, 1)]));
 
 const randomCharacter = () =>
     String.fromCharCode(randomNumber(...unicodeRanges[randomNumber(0, 2)]));
@@ -154,6 +167,10 @@ module.exports = {
     generateRandomNumber,
     randomBoolean,
     generateRandomBoolean,
+    randomNumeric,
+    randomUpper,
+    randomLower,
+    randomAlpha,
     randomCharacter,
     generateRandomCharacter,
     randomString,
