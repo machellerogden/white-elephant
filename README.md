@@ -35,7 +35,7 @@ const {
 } = require('white-elephant');
 ```
 
-### `randomNumber([min = 0], [max = Number.MAX_SAFE_INTEGER])`
+### `randomNumber([min = -Number.MAX_SAFE_INTEGER], [max = Number.MAX_SAFE_INTEGER])`
 
 _**Note:** Random numbers are generated on a curve in order to ensure you get a good mix of smaller and larger numbers._
 
@@ -47,22 +47,19 @@ randomNumber();
 // => 5
 
 randomNumber();
-// => 25192091
+// => -25192091
 
 randomNumber();
 // => 354
 
 randomNumber();
-// => 7832096272493
+// => -7832096272493
 
 randomNumber(10, 50);
 // => 23
 
 randomNumber(1, 10);
 // => 9
-
-randomNumber(10, 50);
-// => 23
 ```
 
 ### `randomCharacter()`
@@ -350,11 +347,11 @@ const {
 } = require('white-elephant');
 ```
 
-### `generateRandomNumber([count = 1], [min = 0], [max = Number.MAX_SAFE_INTEGER])`
+### `generateRandomNumber([count = 1], [min = -Number.MAX_SAFE_INTEGER], [max = Number.MAX_SAFE_INTEGER])`
 
 ```js
 [ ...generateRandomNumber(10) ];
-// => [ 37950, 606631, 6927, 43318, 8216136320, 358043333367, 4119147, 38, 4659302, 32240908 ]
+// => [ 37950, 606631, -6927, 43318, 8216136320, 358043333367, 4119147, 38, 4659302, -32240908 ]
 
 [ ...generateRandomNumber(10, 1, 3) ];
 // => [ 1, 3, 2, 2, 2, 1, 2, 2, 3, 1 ]
