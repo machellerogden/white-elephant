@@ -1,9 +1,9 @@
 'use strict';
 
-function weigh(x, weight = 1) {
+function weigh(x, weight = 1, noFlat = false) {
     weight = Math.floor(weight);
     if (weight < 1) weight = 1;
-    if (Array.isArray(x)) return x.map(v => weigh(v, weight)).flat();
+    if (!noFlat && Array.isArray(x)) return x.map(v => weigh(v, weight)).flat();
     return (new Array(weight)).fill(x);
 }
 
@@ -208,57 +208,66 @@ const doubleLetterFrequency = [ 'ss', 'ee', 'tt', 'ff', 'll', 'mm', 'oo' ];
 const pluralWordLetterFrequency = [ 'e', 'i', 's', 'a', 'r', 'n', 't', 'o', 'l', 'c', 'd', 'u', 'g', 'p', 'm', 'h', 'b', 'y', 'f', 'v', 'k', 'w', 'z', 'x', 'j', 'q' ];
 const nonPluralWordLetterFrequency = [ 'e', 'a', 'i', 'r', 't', 'o', 'n', 's', 'l', 'c', 'u', 'p', 'm', 'd', 'h', 'g', 'b', 'y', 'f', 'v', 'w', 'k', 'x', 'z', 'q', 'j' ];
 
-function randomWord(length, letters) {
-    length = length || randomNumber(1, 16);
-    letters = letters == null
-        ? curve(letterFrequencyInTheEnglishLanguage)
-        : curve(letters);
-    let i = 0;
+function randomWord(len, lett, noCurve = false) {
     let word = '';
-    while (i < length) {
-        const prev = word.length
-            ? word.slice(-1)
-            : '';
-        if (length === 1) {
-            word = randomArg(...oneLetterWords);
-        } else if (length === 2) {
-            word = randomArg(...twoLetterWords);
-        } else if (i < length - 1) {
-            if (i === 0) {
-                word += prev === 'e'
-                    ? randomArg(...mostCommonLetterFollowingE)
-                    : randomArg(...mostCommonFirstLetters);
-            } else if (i === 1) {
-                word += prev === 'e'
-                    ? randomArg(...mostCommonLetterFollowingE)
-                    : randomArg(...mostCommonSecondLetters);
-            } else if (i === 2) {
-                word += prev === 'e'
-                    ? randomArg(...mostCommonLetterFollowingE)
-                    : randomArg(...mostCommonThirdLetters);
-            } else if (length === 3) {
-                let chars = '';
-                chars += prev === 'e'
-                    ? randomArg(...mostCommonLetterFollowingE)
-                    : randomArg(...[ ...weigh(letters, 5), ...doubleLetterFrequency, ...digraphFrequency ]);
-                word += chars;
-                i += chars.length - 1;
-            } else {
-                let chars = '';
-                chars += prev === 'e'
-                    ? randomArg(...mostCommonLetterFollowingE)
-                    : randomArg(...[ ...weigh(letters, 5), ...doubleLetterFrequency, ...digraphFrequency, ...trigraphFrequency ]);
-                word += chars;
-                i += chars.length - 1;
-            }
+    while (![ 'a', 'e', 'i', 'o', 'u' ].some(v => word.split('').includes(v))) {
+        let length = len || randomNumber(...randomArg(...weigh([ 1, 2 ], 3, true), ...weigh([ 3, 5 ], 16, true), ...weigh([ 6, 8 ], 4, true), [ 9, 12 ], [ 12, 14 ]));
+        let letters;
+        if (noCurve) {
+            letters = lett == null
+                ? letterFrequencyInTheEnglishLanguage
+                : lett;
         } else {
-            if (prev === 'e') {
-                word += randomArg(...mostCommonLetterFollowingE);
-            } else {
-                word += randomArg(...[ ...weigh(moreThanHalfOfAllWordsEndWith, mostCommonLastLetters.length / 2), ...mostCommonLastLetters ]);
-            }
+            letters = lett == null
+                ? curve(letterFrequencyInTheEnglishLanguage)
+                : curve(lett);
         }
-        i++;
+        let i = 0;
+        while (i < length) {
+            const prev = word.length
+                ? word.slice(-1)
+                : '';
+            if (length === 1) {
+                word = randomArg(...oneLetterWords);
+            } else if (length === 2) {
+                word = randomArg(...twoLetterWords);
+            } else if (i < length - 1) {
+                if (i === 0) {
+                    word += prev === 'e'
+                        ? randomArg(...mostCommonLetterFollowingE)
+                        : randomArg(...mostCommonFirstLetters);
+                } else if (i === 1) {
+                    word += prev === 'e'
+                        ? randomArg(...mostCommonLetterFollowingE)
+                        : randomArg(...mostCommonSecondLetters);
+                } else if (i === 2) {
+                    word += prev === 'e'
+                        ? randomArg(...mostCommonLetterFollowingE)
+                        : randomArg(...mostCommonThirdLetters);
+                } else if (length === 3) {
+                    let chars = '';
+                    chars += prev === 'e'
+                        ? randomArg(...mostCommonLetterFollowingE)
+                        : randomArg(...[ ...weigh(letters, 5), ...doubleLetterFrequency, ...digraphFrequency ]);
+                    word += chars;
+                    i += chars.length - 1;
+                } else {
+                    let chars = '';
+                    chars += prev === 'e'
+                        ? randomArg(...mostCommonLetterFollowingE)
+                        : randomArg(...[ ...weigh(letters, 5), ...doubleLetterFrequency, ...digraphFrequency, ...trigraphFrequency ]);
+                    word += chars;
+                    i += chars.length - 1;
+                }
+            } else {
+                if (prev === 'e') {
+                    word += randomArg(...mostCommonLetterFollowingE);
+                } else {
+                    word += randomArg(...[ ...weigh(moreThanHalfOfAllWordsEndWith, mostCommonLastLetters.length / 2), ...mostCommonLastLetters ]);
+                }
+            }
+            i++;
+        }
     }
     return word;
 }
