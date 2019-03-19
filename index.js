@@ -8,9 +8,7 @@ function weigh(x, weight = 1, noFlat = false) {
 }
 
 function curve(arr, factor = 4) {
-    return arr.reduce((acc, v, i, c) => {
-        return [ ...acc, ...weigh(v, (c.length - i || 1) / factor) ];
-    }, []);
+    return arr.reduce((acc, v, i, c) => [ ...acc, ...weigh(v, (c.length - i || 1) / factor) ], []);
 }
 
 function Gen(fn) {
