@@ -7,7 +7,7 @@ function weigh(x, weight = 1) {
     return (new Array(weight)).fill(x);
 }
 
-function curve(arr, factor = 2) {
+function curve(arr, factor = 4) {
     return arr.reduce((acc, v, i, c) => {
         return [ ...acc, ...weigh(v, (c.length - i || 1) / factor) ];
     }, []);
@@ -240,14 +240,14 @@ function randomWord(length, letters) {
                 let chars = '';
                 chars += prev === 'e'
                     ? randomArg(...mostCommonLetterFollowingE)
-                    : randomArg(...[ ...weigh(letters, 4), ...digraphFrequency ]);
+                    : randomArg(...[ ...weigh(letters, 5), ...doubleLetterFrequency, ...digraphFrequency ]);
                 word += chars;
                 i += chars.length - 1;
             } else {
                 let chars = '';
                 chars += prev === 'e'
                     ? randomArg(...mostCommonLetterFollowingE)
-                    : randomArg(...[ ...weigh(letters, 4), ...digraphFrequency, ...trigraphFrequency ]);
+                    : randomArg(...[ ...weigh(letters, 5), ...doubleLetterFrequency, ...digraphFrequency, ...trigraphFrequency ]);
                 word += chars;
                 i += chars.length - 1;
             }
@@ -265,7 +265,7 @@ function randomWord(length, letters) {
 
 const generateRandomWord = Gen(randomWord);
 
-const randomSentence = (letters) => {
+const randomSentence = letters => {
     const unprocessedWords = [ ..._.generateRandomWord(_.randomNumber(3, 12), null, letters) ];
     const words = unprocessedWords.filter((v, i, a) => {
         return v != a[i - 1];
@@ -283,7 +283,7 @@ const randomSentence = (letters) => {
 
 const generateRandomSentence = Gen(randomSentence);
 
-const randomParagraph = (letters) => `${[ ..._.generateRandomSentence(_.randomNumber(2, 8), letters) ].join(' ')}\n\n`;
+const randomParagraph = letters => `${[ ..._.generateRandomSentence(_.randomNumber(2, 8), letters) ].join(' ')}\n\n`;
 const generateRandomParagraph = Gen(randomParagraph);
 
 module.exports = {
