@@ -456,6 +456,15 @@ generateRandomArray().next().value;
 
 By now, you get the idea...
 
+# Random Language
+
+Just for fun...
+
+```js
+console.log([ ...generateRandomParagraph(10, letterFrequencyInGeneralFiction) ].join(''));
+
+```
+
 # License
 
 MIT

@@ -1,8 +1,23 @@
 'use strict';
 
 function weigh(x, weight = 1) {
-    if (Array.isArray(x)) return x.map(v => weigh(v)).flat();
+    weight = Math.floor(weight);
+    if (weight < 1) weight = 1;
+    if (Array.isArray(x)) return x.map(v => weigh(v, weight)).flat();
     return (new Array(weight)).fill(x);
+}
+
+function curve(arr, factor = 2) {
+    return arr.reduce((acc, v, i, c) => {
+        return [ ...acc, ...weigh(v, (c.length - i || 1) / factor) ];
+    }, []);
+}
+
+function Gen(fn) {
+    return function* (count = 1, ...args) {
+        let i = 0;
+        while (i++ < count) yield fn(...args);
+    };
 }
 
 const ranges = [
@@ -79,13 +94,6 @@ const randomAlpha = () =>
 const randomCharacter = () =>
     String.fromCharCode(randomNumber(...unicodeRanges[randomNumber(0, 2)]));
 
-function Gen(fn) {
-    return function* (count = 1, ...args) {
-        let i = 0;
-        while (i++ < count) yield fn(...args);
-    };
-}
-
 const generateRandomNumber = Gen(randomNumber);
 const generateRandomBoolean = Gen(randomBoolean);
 const generateRandomCharacter = Gen(randomCharacter);
@@ -128,12 +136,27 @@ function randomArray(maxDepth = 1, baseLength = randomNumber(0, 16), uniformDept
     return stub;
 }
 
+function objectOf(fns, width = randomNumber(1,16)) {
+    if (!Array.isArray(fns)) fns = [ fns ];
+    const stub = {};
+    let i = 0;
+    while (i < width) {
+        let key;
+        while (Reflect.has(stub, key)) key = randomString(randomNumber(0, 32));
+        const value = randomFnCall(...fns);
+        stub[key] = value;
+        i++;
+    }
+    return stub;
+}
+
 function randomObject(maxDepth = 1, baseWidth = randomNumber(0, 16), uniformDepth = false, uniformWidth = false) {
     const stub = {};
     let fns = weigh(primitives, 2);
     let i = 0;
     while (i < baseWidth) {
-        let key = randomString(randomNumber(0, 32));
+        let key;
+        while (Reflect.has(stub, key)) key = randomString(randomNumber(0, 32));
         if (maxDepth > 1) {
             const obs = uniformWidth
                 ? objects(maxDepth - 1, baseWidth, uniformDepth, uniformWidth)
@@ -143,9 +166,6 @@ function randomObject(maxDepth = 1, baseWidth = randomNumber(0, 16), uniformDept
                 : [ ...fns, ...weigh(obs, 2), nils ];
         }
         const value = randomFnCall(...fns);
-        while (Reflect.has(stub, key)) {
-            key = randomString(randomNumber(0, 32));
-        }
         stub[key] = value;
         i++;
     }
@@ -153,6 +173,7 @@ function randomObject(maxDepth = 1, baseWidth = randomNumber(0, 16), uniformDept
 }
 
 const generateRandomArray = Gen(randomArray);
+const generateObjectOf = Gen(objectOf);
 const generateRandomObject = Gen(randomObject);
 
 const randomData = (maxDepth = 1) => randomFnCall(
@@ -162,7 +183,112 @@ const randomData = (maxDepth = 1) => randomFnCall(
 
 const generateRandomData = Gen(randomData);
 
+
+// And, just for fun....
+
+const oneLetterWords = [ 'a', 'i' ];
+const twoLetterWords = [ 'of', 'to', 'in', 'it', 'is', 'be', 'as', 'at', 'so', 'we', 'he', 'by', 'or', 'on', 'do', 'if', 'me', 'my', 'up', 'an', 'go', 'no', 'us', 'am' ];
+const letterFrequencyInTheEnglishLanguage = [ 'e', 't', 'a', 'o', 'i', 'n', 's', 'r', 'h', 'l', 'd', 'c', 'u', 'm', 'f', 'p', 'g', 'w', 'y', 'b', 'v', 'k', 'x', 'j', 'q', 'z' ];
+const letterFrequencyInTheOxfordDictionary = [ 'e', 'a', 'r', 'i', 'o', 't', 'n', 's', 'l', 'c', 'u', 'd', 'p', 'm', 'h', 'g', 'b', 'f', 'y', 'w', 'k', 'v', 'x', 'z', 'j', 'q' ];
+const letterFrequencyInPressReporting = [ 'e', 't', 'a', 'o', 'n', 'i', 's', 'r', 'h', 'l', 'd', 'c', 'm', 'u', 'f', 'p', 'g', 'w', 'y', 'b', 'v', 'k', 'j', 'x', 'q', 'z' ];
+const letterFrequencyInReligiousWritings = [ 'e', 't', 'i', 'a', 'o', 'n', 's', 'r', 'h', 'l', 'd', 'c', 'u', 'm', 'f', 'p', 'y', 'w', 'g', 'b', 'v', 'k', 'x', 'j', 'q', 'z' ];
+const letterFrequencyInScientificWritings = [ 'e', 't', 'a', 'i', 'o', 'n', 's', 'r', 'h', 'l', 'c', 'd', 'u', 'm', 'f', 'p', 'g', 'y', 'b', 'w', 'v', 'k', 'x', 'q', 'j', 'z' ];
+const letterFrequencyInGeneralFiction = [ 'e', 't', 'a', 'o', 'h', 'n', 'i', 's', 'r', 'd', 'l', 'u', 'w', 'm', 'c', 'g', 'f', 'y', 'p', 'v', 'k', 'b', 'j', 'x', 'z', 'q' ];
+
+const mostCommonFirstLetters = [ 't', 'o', 'a', 'w', 'b', 'c', 'd', 's', 'f', 'm', 'r', 'h', 'i', 'y', 'e', 'g', 'l', 'n', 'p', 'u', 'j', 'k' ];
+const mostCommonSecondLetters = [ 'h', 'o', 'e', 'i', 'a', 'u', 'n', 'r', 't' ];
+const mostCommonThirdLetters = [ 'e', 's', 'a', 'r', 'n', 'i' ];
+const mostCommonLastLetters = [ 'e', 's', 't', 'd', 'n', 'r', 'y', 'f', 'l', 'o', 'g', 'h', 'a', 'k', 'm', 'p', 'u', 'w' ];
+const mostCommonLetterFollowingE = [ 'r', 's', 'n', 'd' ];
+const moreThanHalfOfAllWordsEndWith = [ 'e', 't', 'd', 's' ];
+
+const digraphFrequency = [ 'th', 'he', 'an', 'in', 'er', 'on', 're', 'ed', 'nd', 'ha', 'at', 'en', 'es', 'of', 'nt', 'ea', 'ti', 'to', 'io', 'le', 'is', 'ou', 'ar', 'as', 'de', 'rt', 've' ];
+const trigraphFrequency = [ 'the', 'and', 'tha', 'ent', 'ion', 'tio', 'for', 'nde', 'has', 'nce', 'tis', 'oft', 'men' ];
+const doubleLetterFrequency = [ 'ss', 'ee', 'tt', 'ff', 'll', 'mm', 'oo' ];
+const pluralWordLetterFrequency = [ 'e', 'i', 's', 'a', 'r', 'n', 't', 'o', 'l', 'c', 'd', 'u', 'g', 'p', 'm', 'h', 'b', 'y', 'f', 'v', 'k', 'w', 'z', 'x', 'j', 'q' ];
+const nonPluralWordLetterFrequency = [ 'e', 'a', 'i', 'r', 't', 'o', 'n', 's', 'l', 'c', 'u', 'p', 'm', 'd', 'h', 'g', 'b', 'y', 'f', 'v', 'w', 'k', 'x', 'z', 'q', 'j' ];
+
+function randomWord(length, letters) {
+    length = length || randomNumber(1, 16);
+    letters = letters == null
+        ? curve(letterFrequencyInTheEnglishLanguage)
+        : curve(letters);
+    let i = 0;
+    let word = '';
+    while (i < length) {
+        const prev = word.length
+            ? word.slice(-1)
+            : '';
+        if (length === 1) {
+            word = randomArg(...oneLetterWords);
+        } else if (length === 2) {
+            word = randomArg(...twoLetterWords);
+        } else if (i < length - 1) {
+            if (i === 0) {
+                word += prev === 'e'
+                    ? randomArg(...mostCommonLetterFollowingE)
+                    : randomArg(...mostCommonFirstLetters);
+            } else if (i === 1) {
+                word += prev === 'e'
+                    ? randomArg(...mostCommonLetterFollowingE)
+                    : randomArg(...mostCommonSecondLetters);
+            } else if (i === 2) {
+                word += prev === 'e'
+                    ? randomArg(...mostCommonLetterFollowingE)
+                    : randomArg(...mostCommonThirdLetters);
+            } else if (length === 3) {
+                let chars = '';
+                chars += prev === 'e'
+                    ? randomArg(...mostCommonLetterFollowingE)
+                    : randomArg(...[ ...weigh(letters, 4), ...digraphFrequency ]);
+                word += chars;
+                i += chars.length - 1;
+            } else {
+                let chars = '';
+                chars += prev === 'e'
+                    ? randomArg(...mostCommonLetterFollowingE)
+                    : randomArg(...[ ...weigh(letters, 4), ...digraphFrequency, ...trigraphFrequency ]);
+                word += chars;
+                i += chars.length - 1;
+            }
+        } else {
+            if (prev === 'e') {
+                word += randomArg(...mostCommonLetterFollowingE);
+            } else {
+                word += randomArg(...[ ...weigh(moreThanHalfOfAllWordsEndWith, mostCommonLastLetters.length / 2), ...mostCommonLastLetters ]);
+            }
+        }
+        i++;
+    }
+    return word;
+}
+
+const generateRandomWord = Gen(randomWord);
+
+const randomSentence = (letters) => {
+    const unprocessedWords = [ ..._.generateRandomWord(_.randomNumber(3, 12), null, letters) ];
+    const words = unprocessedWords.filter((v, i, a) => {
+        return v != a[i - 1];
+    });
+    const unprocessedSentence = `${words.join(' ')}.`;
+    const sentence = `${unprocessedSentence.split('').reduce((acc, c, i, a) => {
+        if (c === ' ' && [ ' ' ].includes(acc[acc.length - 1])) return acc;
+        if (c === '.' && [ 'a', 'i' ].includes(acc[acc.length - 1])) return acc;
+        if (i === 0 || (a[i - 1] === ' ' && [' ', '.' ].includes(a[i + 1]) && oneLetterWords.includes(c))) return [ ...acc, c.toUpperCase() ];
+        if (c === ' ') return [ ...acc, randomArg(...[ ...weigh(' ', 9), ', ' ]) ];
+        return [ ...acc, c ];
+    }, []).join('')}`;
+    return sentence;
+};
+
+const generateRandomSentence = Gen(randomSentence);
+
+const randomParagraph = (letters) => `${[ ..._.generateRandomSentence(_.randomNumber(2, 8), letters) ].join(' ')}\n\n`;
+const generateRandomParagraph = Gen(randomParagraph);
+
 module.exports = {
+    weigh,
+    curve,
     randomNumber,
     generateRandomNumber,
     randomBoolean,
@@ -177,9 +303,34 @@ module.exports = {
     generateRandomString,
     randomArray,
     generateRandomArray,
+    objectOf,
+    generateObjectOf,
     randomObject,
     generateRandomObject,
     randomData,
     generateRandomData,
-    randomFnCall
+    randomFnCall,
+    letterFrequencyInTheEnglishLanguage,
+    letterFrequencyInTheOxfordDictionary,
+    letterFrequencyInPressReporting,
+    letterFrequencyInReligiousWritings,
+    letterFrequencyInScientificWritings,
+    letterFrequencyInGeneralFiction,
+    mostCommonFirstLetters,
+    mostCommonSecondLetters,
+    mostCommonThirdLetters,
+    mostCommonLastLetters,
+    mostCommonLetterFollowingE,
+    moreThanHalfOfAllWordsEndWith,
+    digraphFrequency,
+    trigraphFrequency,
+    doubleLetterFrequency,
+    pluralWordLetterFrequency,
+    nonPluralWordLetterFrequency,
+    randomWord,
+    generateRandomWord,
+    randomSentence,
+    generateRandomSentence,
+    randomParagraph,
+    generateRandomParagraph
 };
