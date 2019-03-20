@@ -7,9 +7,8 @@ function weigh(x, weight = 1, noFlat = false) {
     return (new Array(weight)).fill(x);
 }
 
-function curve(arr, factor = 4) {
-    return arr.reduce((acc, v, i, c) => [ ...acc, ...weigh(v, (c.length - i || 1) / factor) ], []);
-}
+const curve = (arr, exponent = 1.1) => arr.reduce((acc, v, i, c) =>
+    [ ...acc, ...weigh(v, Math.pow(arr.length - i, exponent)) ], []);
 
 function Gen(fn) {
     return function* (count = 1, ...args) {
