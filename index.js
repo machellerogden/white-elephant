@@ -1,14 +1,20 @@
 'use strict';
 
-function weigh(x, weight = 1, noFlat = false) {
-    weight = Math.floor(weight);
+function weigh(weight, items) {
+    if (!Array.isArray(items)) items = [ items ];
+    weight = typeof weight !== 'number'
+        ? 1
+        : Math.floor(weight);
     if (weight < 1) weight = 1;
-    if (!noFlat && Array.isArray(x)) return x.map(v => weigh(v, weight)).flat();
-    return (new Array(weight)).fill(x);
+    return items.map(v => (new Array(weight)).fill(v)).flat();
 }
 
 const curve = (arr, exponent = 1.1) => arr.reduce((acc, v, i, c) =>
-    [ ...acc, ...weigh(v, Math.pow(arr.length - i, exponent)) ], []);
+    [ ...acc, ...weigh(Math.pow(arr.length - i, exponent), [ v ]) ], []);
+
+function* range(a, b) {
+    while (a < b) yield a++;
+}
 
 function Gen(fn) {
     return function* (count = 1, ...args) {
@@ -113,9 +119,21 @@ const objects = (maxDepth, width, uniformDepth, uniformWidth) => [
     () => randomObject(maxDepth, width != null ? width : randomNumber(0, 16), uniformDepth, uniformWidth)
 ];
 
+function arrayOf(fns, length = randomNumber(1, 16)) {
+    if (!Array.isArray(fns)) fns = [ fns ];
+    const stub = [];
+    let i = 0;
+    while (i < length) {
+        const value = randomFnCall(...fns);
+        stub[i] = value;
+        i++;
+    }
+    return stub;
+}
+
 function randomArray(maxDepth = 1, baseLength = randomNumber(0, 16), uniformDepth = false, uniformLength = false) {
     const stub = [];
-    let fns = weigh(primitives, 2);
+    let fns = weigh(2, primitives);
     let i = 0;
     while (i < baseLength) {
         if (maxDepth > 1) {
@@ -124,7 +142,7 @@ function randomArray(maxDepth = 1, baseLength = randomNumber(0, 16), uniformDept
                 : objects(maxDepth - 1, null, uniformDepth, uniformLength);
             fns = uniformDepth
                 ? obs
-                : [ ...fns, ...weigh(obs, 2), nils ];
+                : [ ...fns, ...weigh(2, obs), nils ];
         }
         const value = randomFnCall(...fns);
         stub[i] = value;
@@ -133,13 +151,13 @@ function randomArray(maxDepth = 1, baseLength = randomNumber(0, 16), uniformDept
     return stub;
 }
 
-function objectOf(fns, width = randomNumber(1,16)) {
+function objectOf(fns, width = randomNumber(1, 16)) {
     if (!Array.isArray(fns)) fns = [ fns ];
     const stub = {};
     let i = 0;
     while (i < width) {
-        let key;
-        while (Reflect.has(stub, key)) key = randomString(randomNumber(0, 32));
+        let key = randomString(randomNumber(1, 32));
+        while (Reflect.has(stub, key)) key = randomString(randomNumber(1, 32));
         const value = randomFnCall(...fns);
         stub[key] = value;
         i++;
@@ -149,18 +167,18 @@ function objectOf(fns, width = randomNumber(1,16)) {
 
 function randomObject(maxDepth = 1, baseWidth = randomNumber(0, 16), uniformDepth = false, uniformWidth = false) {
     const stub = {};
-    let fns = weigh(primitives, 2);
+    let fns = weigh(2, primitives);
     let i = 0;
     while (i < baseWidth) {
-        let key;
-        while (Reflect.has(stub, key)) key = randomString(randomNumber(0, 32));
+        let key = randomString(randomNumber(1, 32));
+        while (Reflect.has(stub, key)) key = randomString(randomNumber(1, 32));
         if (maxDepth > 1) {
             const obs = uniformWidth
                 ? objects(maxDepth - 1, baseWidth, uniformDepth, uniformWidth)
                 : objects(maxDepth - 1, randomNumber(0, 16), uniformDepth, uniformWidth);
             fns = uniformDepth
                 ? obs
-                : [ ...fns, ...weigh(obs, 2), nils ];
+                : [ ...fns, ...weigh(2, obs), nils ];
         }
         const value = randomFnCall(...fns);
         stub[key] = value;
@@ -169,6 +187,7 @@ function randomObject(maxDepth = 1, baseWidth = randomNumber(0, 16), uniformDept
     return stub;
 }
 
+const generateArrayOf = Gen(arrayOf);
 const generateRandomArray = Gen(randomArray);
 const generateObjectOf = Gen(objectOf);
 const generateRandomObject = Gen(randomObject);
@@ -205,30 +224,23 @@ const doubleLetterFrequency = [ 'ss', 'ee', 'tt', 'ff', 'll', 'mm', 'oo' ];
 const pluralWordLetterFrequency = [ 'e', 'i', 's', 'a', 'r', 'n', 't', 'o', 'l', 'c', 'd', 'u', 'g', 'p', 'm', 'h', 'b', 'y', 'f', 'v', 'k', 'w', 'z', 'x', 'j', 'q' ];
 const nonPluralWordLetterFrequency = [ 'e', 'a', 'i', 'r', 't', 'o', 'n', 's', 'l', 'c', 'u', 'p', 'm', 'd', 'h', 'g', 'b', 'y', 'f', 'v', 'w', 'k', 'x', 'z', 'q', 'j' ];
 
-function randomWord(len, lett, noCurve = false) {
+function randomWord(length, letters, noCurve = false) {
     let word = '';
     while (![ 'a', 'e', 'i', 'o', 'u' ].some(v => word.split('').includes(v))) {
-        let length = len || randomNumber(...randomArg(...weigh([ 1, 2 ], 3, true), ...weigh([ 3, 5 ], 16, true), ...weigh([ 6, 8 ], 4, true), [ 9, 12 ], [ 12, 14 ]));
-        let letters;
-        if (noCurve) {
-            letters = lett == null
-                ? letterFrequencyInTheEnglishLanguage
-                : lett;
-        } else {
-            letters = lett == null
-                ? curve(letterFrequencyInTheEnglishLanguage)
-                : curve(lett);
-        }
+        let _length = length || randomNumber(...randomArg(...weigh(3, [ [ 1, 2 ] ]), ...weigh(16, [ [ 3, 5 ] ]), ...weigh(4, [ [ 6, 8 ] ]), [ 9, 12 ], [ 12, 14 ]));
+        let _letters = letters == null
+            ? curve(letterFrequencyInTheEnglishLanguage)
+            : curve(letters);
         let i = 0;
-        while (i < length) {
+        while (i < _length) {
             const prev = word.length
                 ? word.slice(-1)
                 : '';
-            if (length === 1) {
+            if (_length === 1) {
                 word = randomArg(...oneLetterWords);
-            } else if (length === 2) {
+            } else if (_length === 2) {
                 word = randomArg(...twoLetterWords);
-            } else if (i < length - 1) {
+            } else if (i < _length - 1) {
                 if (i === 0) {
                     word += prev === 'e'
                         ? randomArg(...mostCommonLetterFollowingE)
@@ -241,18 +253,18 @@ function randomWord(len, lett, noCurve = false) {
                     word += prev === 'e'
                         ? randomArg(...mostCommonLetterFollowingE)
                         : randomArg(...mostCommonThirdLetters);
-                } else if (length === 3) {
+                } else if (_length === 3) {
                     let chars = '';
                     chars += prev === 'e'
                         ? randomArg(...mostCommonLetterFollowingE)
-                        : randomArg(...[ ...weigh(letters, 5), ...doubleLetterFrequency, ...digraphFrequency ]);
+                        : randomArg(...[ ...weigh(5, _letters), ...doubleLetterFrequency, ...digraphFrequency ]);
                     word += chars;
                     i += chars.length - 1;
                 } else {
                     let chars = '';
                     chars += prev === 'e'
                         ? randomArg(...mostCommonLetterFollowingE)
-                        : randomArg(...[ ...weigh(letters, 5), ...doubleLetterFrequency, ...digraphFrequency, ...trigraphFrequency ]);
+                        : randomArg(...[ ...weigh(5, _letters), ...doubleLetterFrequency, ...digraphFrequency, ...trigraphFrequency ]);
                     word += chars;
                     i += chars.length - 1;
                 }
@@ -260,7 +272,7 @@ function randomWord(len, lett, noCurve = false) {
                 if (prev === 'e') {
                     word += randomArg(...mostCommonLetterFollowingE);
                 } else {
-                    word += randomArg(...[ ...weigh(moreThanHalfOfAllWordsEndWith, mostCommonLastLetters.length / 2), ...mostCommonLastLetters ]);
+                    word += randomArg(...[ ...weigh(mostCommonLastLetters.length / 2, moreThanHalfOfAllWordsEndWith), ...mostCommonLastLetters ]);
                 }
             }
             i++;
@@ -281,7 +293,7 @@ const randomSentence = letters => {
         if (c === ' ' && [ ' ' ].includes(acc[acc.length - 1])) return acc;
         if (c === '.' && [ 'a', 'i' ].includes(acc[acc.length - 1])) return acc;
         if (i === 0 || (a[i - 1] === ' ' && [' ', '.' ].includes(a[i + 1]) && oneLetterWords.includes(c))) return [ ...acc, c.toUpperCase() ];
-        if (c === ' ') return [ ...acc, randomArg(...[ ...weigh(' ', 9), ', ' ]) ];
+        if (c === ' ') return [ ...acc, randomArg(...[ ...weigh(9, ' '), ', ' ]) ];
         return [ ...acc, c ];
     }, []).join('')}`;
     return sentence;
@@ -292,9 +304,34 @@ const generateRandomSentence = Gen(randomSentence);
 const randomParagraph = letters => `${[ ..._.generateRandomSentence(_.randomNumber(2, 8), letters) ].join(' ')}\n\n`;
 const generateRandomParagraph = Gen(randomParagraph);
 
+function randomName() {
+    const length = randomNumber(...randomArg(...weigh(2, [ [ 2, 3 ] ]), ...weigh(16, [ [ 3, 5 ] ]), ...weigh(4, [ [ 6, 8 ] ])));
+    const name = randomWord(length, letterFrequencyInTheOxfordDictionary);
+    return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+const generateRandomName = Gen(randomName);
+
+const randomAge = () => randomNumber(...randomArg(...curve([ [ 17, 35 ], [ 36, 40 ], [ 45, 50 ], [ 50, 67 ] ])));
+
+const generateRandomAge = Gen(randomAge);
+
+const randomPerson = () => ({
+    name: randomName(),
+    age: randomAge(),
+    ad_track_data: arrayOf(() =>
+        objectOf(randomNumber, randomArg(...range(1, 4))),
+        randomArg(...range(1, 4)))
+});
+
+const generateRandomPerson = Gen(randomPerson);
+
+
 module.exports = {
     weigh,
     curve,
+    range,
+    Gen,
     randomNumber,
     generateRandomNumber,
     randomBoolean,
@@ -307,6 +344,8 @@ module.exports = {
     generateRandomCharacter,
     randomString,
     generateRandomString,
+    arrayOf,
+    generateArrayOf,
     randomArray,
     generateRandomArray,
     objectOf,
@@ -315,6 +354,7 @@ module.exports = {
     generateRandomObject,
     randomData,
     generateRandomData,
+    randomArg,
     randomFnCall,
     letterFrequencyInTheEnglishLanguage,
     letterFrequencyInTheOxfordDictionary,
@@ -338,5 +378,11 @@ module.exports = {
     randomSentence,
     generateRandomSentence,
     randomParagraph,
-    generateRandomParagraph
+    generateRandomParagraph,
+    randomName,
+    generateRandomName,
+    randomAge,
+    generateRandomAge,
+    randomPerson,
+    generateRandomPerson
 };

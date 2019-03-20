@@ -456,14 +456,18 @@ generateRandomArray().next().value;
 
 By now, you get the idea...
 
-# Random Language
+# Random Other Stuff...
 
 Just for fun...
 
 ```js
-console.log([ ...generateRandomParagraph(10, letterFrequencyInGeneralFiction) ].join(''));
-
+const { inspect } = require('util');
+const log = v => console.log(inspect(v, { depth: null, colors: true }));
+log([ ...generateRandomParagraph(10, letterFrequencyInGeneralFiction) ].join(''));
+log([ ...generateRandomPerson(10) ]);
 ```
+
+Check the source for more.
 
 # License
 
