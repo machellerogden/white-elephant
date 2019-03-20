@@ -319,9 +319,7 @@ const generateRandomAge = Gen(randomAge);
 const randomPerson = () => ({
     name: randomName(),
     age: randomAge(),
-    ad_track_data: arrayOf(() =>
-        objectOf(randomNumber, randomArg(...range(1, 4))),
-        randomArg(...range(1, 4)))
+    ad_track_data: [ ...Gen(() => objectOf(randomNumber, randomArg(...range(1, 4))))(randomArg(...range(1, 4))) ]
 });
 
 const generateRandomPerson = Gen(randomPerson);
