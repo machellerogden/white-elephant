@@ -204,6 +204,7 @@ const generateRandomData = Gen(randomData);
 
 const oneLetterWords = [ 'a', 'i' ];
 const twoLetterWords = [ 'of', 'to', 'in', 'it', 'is', 'be', 'as', 'at', 'so', 'we', 'he', 'by', 'or', 'on', 'do', 'if', 'me', 'my', 'up', 'an', 'go', 'no', 'us', 'am' ];
+const letterFrequencyInTheTrioLanguage = [ 'th', 'l', 'a', 'o', 'i', 'n', 's', 'j' ];
 const letterFrequencyInTheEnglishLanguage = [ 'e', 't', 'a', 'o', 'i', 'n', 's', 'r', 'h', 'l', 'd', 'c', 'u', 'm', 'f', 'p', 'g', 'w', 'y', 'b', 'v', 'k', 'x', 'j', 'q', 'z' ];
 const letterFrequencyInTheOxfordDictionary = [ 'e', 'a', 'r', 'i', 'o', 't', 'n', 's', 'l', 'c', 'u', 'd', 'p', 'm', 'h', 'g', 'b', 'f', 'y', 'w', 'k', 'v', 'x', 'z', 'j', 'q' ];
 const letterFrequencyInPressReporting = [ 'e', 't', 'a', 'o', 'n', 'i', 's', 'r', 'h', 'l', 'd', 'c', 'm', 'u', 'f', 'p', 'g', 'w', 'y', 'b', 'v', 'k', 'j', 'x', 'q', 'z' ];
@@ -229,52 +230,17 @@ function randomWord(length, letters, noCurve = false) {
     while (![ 'a', 'e', 'i', 'o', 'u' ].some(v => word.split('').includes(v))) {
         let _length = length || randomNumber(...randomArg(...weigh(3, [ [ 1, 2 ] ]), ...weigh(16, [ [ 3, 5 ] ]), ...weigh(4, [ [ 6, 8 ] ]), [ 9, 12 ], [ 12, 14 ]));
         let _letters = letters == null
-            ? curve(letterFrequencyInTheEnglishLanguage)
+            ? curve(letterFrequencyInTheTrioLanguage)
             : curve(letters);
         let i = 0;
         while (i < _length) {
             const prev = word.length
                 ? word.slice(-1)
                 : '';
-            if (_length === 1) {
-                word = randomArg(...oneLetterWords);
-            } else if (_length === 2) {
-                word = randomArg(...twoLetterWords);
-            } else if (i < _length - 1) {
-                if (i === 0) {
-                    word += prev === 'e'
-                        ? randomArg(...mostCommonLetterFollowingE)
-                        : randomArg(...mostCommonFirstLetters);
-                } else if (i === 1) {
-                    word += prev === 'e'
-                        ? randomArg(...mostCommonLetterFollowingE)
-                        : randomArg(...mostCommonSecondLetters);
-                } else if (i === 2) {
-                    word += prev === 'e'
-                        ? randomArg(...mostCommonLetterFollowingE)
-                        : randomArg(...mostCommonThirdLetters);
-                } else if (_length === 3) {
-                    let chars = '';
-                    chars += prev === 'e'
-                        ? randomArg(...mostCommonLetterFollowingE)
-                        : randomArg(...[ ...weigh(5, _letters), ...doubleLetterFrequency, ...digraphFrequency ]);
-                    word += chars;
-                    i += chars.length - 1;
-                } else {
-                    let chars = '';
-                    chars += prev === 'e'
-                        ? randomArg(...mostCommonLetterFollowingE)
-                        : randomArg(...[ ...weigh(5, _letters), ...doubleLetterFrequency, ...digraphFrequency, ...trigraphFrequency ]);
-                    word += chars;
-                    i += chars.length - 1;
-                }
-            } else {
-                if (prev === 'e') {
-                    word += randomArg(...mostCommonLetterFollowingE);
-                } else {
-                    word += randomArg(...[ ...weigh(mostCommonLastLetters.length / 2, moreThanHalfOfAllWordsEndWith), ...mostCommonLastLetters ]);
-                }
-            }
+                let chars = '';
+                chars += randomArg(...[ ...weigh(5, _letters) ]); //, ...doubleLetterFrequency, ...digraphFrequency ]);
+                word += chars;
+                i += chars.length - 1;
             i++;
         }
     }
@@ -355,6 +321,7 @@ module.exports = {
     randomArg,
     randomFnCall,
     letterFrequencyInTheEnglishLanguage,
+    letterFrequencyInTheTrioLanguage,
     letterFrequencyInTheOxfordDictionary,
     letterFrequencyInPressReporting,
     letterFrequencyInReligiousWritings,
