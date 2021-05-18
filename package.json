@@ -1,6 +1,6 @@
 {
   "name": "white-elephant",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Generate random data",
   "main": "index.js",
   "scripts": {
