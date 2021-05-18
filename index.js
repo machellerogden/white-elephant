@@ -284,7 +284,7 @@ function randomWord(length, letters, noCurve = false) {
 const generateRandomWord = Gen(randomWord);
 
 const randomSentence = letters => {
-    const unprocessedWords = [ ..._.generateRandomWord(_.randomNumber(3, 12), null, letters) ];
+    const unprocessedWords = [ ...generateRandomWord(randomNumber(3, 12), null, letters) ];
     const words = unprocessedWords.filter((v, i, a) => {
         return v != a[i - 1];
     });
@@ -301,7 +301,7 @@ const randomSentence = letters => {
 
 const generateRandomSentence = Gen(randomSentence);
 
-const randomParagraph = letters => `${[ ..._.generateRandomSentence(_.randomNumber(2, 8), letters) ].join(' ')}\n\n`;
+const randomParagraph = letters => `${[ ...generateRandomSentence(randomNumber(2, 8), letters) ].join(' ')}\n\n`;
 const generateRandomParagraph = Gen(randomParagraph);
 
 function randomName() {
