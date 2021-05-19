@@ -1,5 +1,7 @@
 'use strict';
 
+const { pronounceableTest } = require('./pronounceable');
+
 function weigh(weight, items) {
     if (!Array.isArray(items)) items = [ items ];
     weight = typeof weight !== 'number'
@@ -294,7 +296,8 @@ function randomWord(length, letters, noCurve = false) {
             }
             i++;
         }
-        if (maxConsecutiveLetters(word) > 2 || maxConsecutiveConsonents(word) > 4) word = '';
+        if (!pronounceableTest(word)) word = '';
+        //if (maxConsecutiveLetters(word) > 2 || maxConsecutiveConsonents(word) > 4) word = '';
     }
     return word;
 }
@@ -401,10 +404,3 @@ module.exports = {
     randomPerson,
     generateRandomPerson
 };
-
-//(async () => {
-    //while (true) {
-        //await new Promise(r => setTimeout(r, 100));
-        //process.stdout.write(randomParagraph());
-    //}
-//})();

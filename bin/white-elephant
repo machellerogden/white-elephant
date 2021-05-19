@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+const { randomParagraph } = require('..');
+
+(async () => {
+    while (true) {
+        await new Promise(r => setTimeout(r, 100));
+        process.stdout.write(randomParagraph());
+    }
+})();
+
