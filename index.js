@@ -313,7 +313,7 @@ const randomSentence = letters => {
     const sentence = `${unprocessedSentence.split('').reduce((acc, c, i, a) => {
         if (c === ' ' && [ ' ' ].includes(acc[acc.length - 1])) return acc;
         if (c === '.' && [ 'a', 'i' ].includes(acc[acc.length - 1])) return acc;
-        if (i === 0 || (a[i - 1] === ' ' && [' ', '.' ].includes(a[i + 1]) && oneLetterWords.includes(c))) return [ ...acc, c.toUpperCase() ];
+        if (i === 0 || (a[i - 1] === ' ' && [' ', '.' ].includes(a[i + 1]) && c == 'i')) return [ ...acc, c.toUpperCase() ];
         if (c === ' ') return [ ...acc, randomArg(...[ ...weigh(9, ' '), ', ' ]) ];
         return [ ...acc, c ];
     }, []).join('')}`;
